@@ -1,6 +1,9 @@
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.routing import Route
+from starlette.requests import Request
+from starlette.responses import Response
+
 
 import phone_books.contacts as core
 
@@ -8,7 +11,18 @@ import phone_books.contacts as core
 async def homepage(request):
     return JSONResponse({"hello": "world 2"})
 
-async def contacts_store(request):
+
+async def contacts_index(request: Request) -> Response:
+    name = request.query_params.get("filter[name]")
+    phone = request.query_params.get("filter[phone]")
+    email = request.query_params.get("filter[email]")
+
+    contacts = await core.get_all_contacts(name=name, phone=phone, email=email)
+
+    return JSONResponse(contacts)
+
+
+async def contacts_store(request: Request) -> Response:
     data = await request.json()
     assert isinstance(data, dict)
     assert "name" in data
@@ -20,12 +34,12 @@ async def contacts_store(request):
     return JSONResponse(contact)
 
 
-
 def make_app() -> Starlette:
     app = Starlette(
         debug=True,
         routes=[
             Route("/", homepage),
+            Route("/contacts", contacts_index, methods=["GET"]),
             Route("/contacts", contacts_store, methods=["POST"]),
         ],
     )
@@ -42,6 +56,7 @@ def main():
         reload=True,
         reload_dirs=["phone_books_web", "phone_books"],
     )
+
 
 if __name__ == "__main__":
     main()
