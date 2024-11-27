@@ -1,3 +1,7 @@
+python-dotenv==1.0.1
+watchfiles==1.0.0
 # web
 starlette==0.41.3
 uvicorn==0.32.1
+# database
+psycopg[binary,pool]==3.2.3

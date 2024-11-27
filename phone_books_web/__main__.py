@@ -1,11 +1,14 @@
-from starlette.applications import Starlette
-from starlette.responses import JSONResponse
-from starlette.routing import Route
-from starlette.requests import Request
-from starlette.responses import Response
+import contextlib
+from typing import AsyncIterator, TypedDict
 
+from psycopg_pool import AsyncConnectionPool
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
+from starlette.routing import Route
 
 import phone_books.contacts as core
+from phone_books_web import settings
 
 
 async def homepage(request: Request) -> Response:
@@ -63,9 +66,26 @@ async def contacts_delete(request: Request) -> Response:
     return JSONResponse({"message": "Contact deleted"})
 
 
-def make_app() -> Starlette:
+class State(TypedDict):
+    db_pool: AsyncConnectionPool
+
+
+def make_app_lifespan(config: settings.Config):
+    @contextlib.asynccontextmanager
+    async def app_lifespan(app: Starlette) -> AsyncIterator[State]:
+        async with AsyncConnectionPool(config.database_url) as pool:
+            yield State(db_pool=pool)
+
+    return app_lifespan
+
+
+def make_app(config: settings.Config | None = None) -> Starlette:
+    if config is None:
+        config = settings.Config.from_dotenv(verbose=True)
+
     app = Starlette(
-        debug=True,
+        debug=config.debug,
+        lifespan=make_app_lifespan(config),
         routes=[
             Route("/", homepage),
             Route("/contacts", contacts_index, methods=["GET"]),
@@ -87,6 +107,7 @@ def main():
         port=5000,
         reload=True,
         reload_dirs=["phone_books_web", "phone_books"],
+        reload_includes=[".env"]
     )
 
 

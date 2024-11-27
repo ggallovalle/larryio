@@ -10,6 +10,13 @@ source .venv/bin/activate
 # install dependencies in requirements.txt and requirements-dev.txt
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
+
+# create a copy of the .env.example file and rename it to .env
+# update the .env file with the correct values
+cp .env.example .env
+
+# run the web application for development
+python -m phone_books_web
 ```
 
 # Tests
