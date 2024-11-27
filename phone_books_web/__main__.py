@@ -33,6 +33,12 @@ async def contacts_store(request: Request) -> Response:
 
     return JSONResponse(contact)
 
+async def contacts_show(request: Request) -> Response:
+    ref = request.path_params["id"]
+
+    contact = await core.get_contact_by_id(ref)
+
+    return JSONResponse(contact)
 
 def make_app() -> Starlette:
     app = Starlette(
@@ -41,6 +47,7 @@ def make_app() -> Starlette:
             Route("/", homepage),
             Route("/contacts", contacts_index, methods=["GET"]),
             Route("/contacts", contacts_store, methods=["POST"]),
+            Route("/contacts/{id}", contacts_show, methods=["GET"]),
         ],
     )
     return app
