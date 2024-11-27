@@ -40,6 +40,15 @@ async def contacts_show(request: Request) -> Response:
 
     return JSONResponse(contact)
 
+async def contacts_update(request: Request) -> Response:
+    ref = request.path_params["id"]
+    data = await request.json()
+    assert isinstance(data, dict)
+
+    contact = await core.update_contact(ref, data)
+
+    return JSONResponse(contact)
+
 def make_app() -> Starlette:
     app = Starlette(
         debug=True,
@@ -48,6 +57,7 @@ def make_app() -> Starlette:
             Route("/contacts", contacts_index, methods=["GET"]),
             Route("/contacts", contacts_store, methods=["POST"]),
             Route("/contacts/{id}", contacts_show, methods=["GET"]),
+            Route("/contacts/{id}", contacts_update, methods=["PATCH"]),
         ],
     )
     return app
