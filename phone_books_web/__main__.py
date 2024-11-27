@@ -8,7 +8,7 @@ from starlette.responses import Response
 import phone_books.contacts as core
 
 
-async def homepage(request):
+async def homepage(request: Request) -> Response:
     return JSONResponse({"hello": "world 2"})
 
 
@@ -33,12 +33,14 @@ async def contacts_store(request: Request) -> Response:
 
     return JSONResponse(contact)
 
+
 async def contacts_show(request: Request) -> Response:
     ref = request.path_params["id"]
 
     contact = await core.get_contact_by_id(ref)
 
     return JSONResponse(contact)
+
 
 async def contacts_update(request: Request) -> Response:
     ref = request.path_params["id"]
@@ -49,6 +51,18 @@ async def contacts_update(request: Request) -> Response:
 
     return JSONResponse(contact)
 
+
+async def contacts_delete(request: Request) -> Response:
+    ref = request.path_params["id"]
+
+    deleted = await core.delete_contact(ref)
+
+    if not deleted:
+        return JSONResponse({"message": "Contact not found"}, status_code=404)
+
+    return JSONResponse({"message": "Contact deleted"})
+
+
 def make_app() -> Starlette:
     app = Starlette(
         debug=True,
@@ -58,6 +72,7 @@ def make_app() -> Starlette:
             Route("/contacts", contacts_store, methods=["POST"]),
             Route("/contacts/{id}", contacts_show, methods=["GET"]),
             Route("/contacts/{id}", contacts_update, methods=["PATCH"]),
+            Route("/contacts/{id}", contacts_delete, methods=["DELETE"]),
         ],
     )
     return app
