@@ -31,8 +31,10 @@ async def contacts_store(request: Request) -> Response:
     assert "name" in data
     assert "phone" in data
     assert "email" in data
+    pg_pool = State.get_pg_pool(request)
 
-    contact = await core.create_contact(data)
+    async with pg_pool.connection() as pg_conn:
+        contact = await core.create_contact(data, pg_conn)
 
     return JSONResponse(contact)
 
@@ -67,14 +69,18 @@ async def contacts_delete(request: Request) -> Response:
 
 
 class State(TypedDict):
-    db_pool: AsyncConnectionPool
+    pg_pool: AsyncConnectionPool
+
+    @staticmethod
+    def get_pg_pool(request: Request) -> AsyncConnectionPool:
+        return request.app.state["pg_pool"]
 
 
 def make_app_lifespan(config: settings.Config):
     @contextlib.asynccontextmanager
     async def app_lifespan(app: Starlette) -> AsyncIterator[State]:
         async with AsyncConnectionPool(config.database_url) as pool:
-            yield State(db_pool=pool)
+            yield State(pg_pool=pool)
 
     return app_lifespan
 
