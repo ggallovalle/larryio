@@ -1,6 +1,10 @@
 # macOS
 .DS_Store
 
+# env secrets
+.env
+.env.test
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -94,7 +98,6 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
