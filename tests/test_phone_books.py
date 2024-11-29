@@ -109,11 +109,12 @@ async def test_given_contacts_when_update_contact_then_return_updated_contact(pg
     contact = {"name": "John Doe", "phone": "1234567890", "email": "john@email.com"}
     created = await sut.create_contact(contact, pg_conn)
     # when
-    updated = await sut.update_contact(created["id"], {"name": "John Smith"})
+    updated = await sut.update_contact(created["id"], {"name": "John Smith"}, conn=pg_conn)
     reference = await sut.get_contact_by_id(created["id"], pg_conn)
     # then
     assert updated["name"] == "John Smith"
     assert updated["name"] == reference["name"]
+    assert updated["phone"] == reference["phone"]
 
 
 @pytest.mark.asyncio

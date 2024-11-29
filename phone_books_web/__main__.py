@@ -37,7 +37,7 @@ async def contacts_store(request: Request) -> Response:
     pg_pool = State.get_pg_pool(request)
 
     async with pg_pool.connection() as pg_conn:
-        contact = await core.create_contact(data, pg_conn)
+        contact = await core.create_contact(data, conn=pg_conn)
 
     return JSONResponse(contact)
 
@@ -48,7 +48,7 @@ async def contacts_show(request: Request) -> Response:
     pg_pool = State.get_pg_pool(request)
 
     async with pg_pool.connection() as pg_conn:
-        contact = await core.get_contact_by_id(ref, pg_conn)
+        contact = await core.get_contact_by_id(ref, conn=pg_conn)
 
     return JSONResponse(contact)
 
@@ -58,7 +58,10 @@ async def contacts_update(request: Request) -> Response:
     data = await request.json()
     assert isinstance(data, dict)
 
-    contact = await core.update_contact(ref, data)
+    pg_pool = State.get_pg_pool(request)
+
+    async with pg_pool.connection() as pg_conn:
+        contact = await core.update_contact(ref, data, conn=pg_conn)
 
     return JSONResponse(contact)
 

@@ -56,8 +56,10 @@ async def get_all_contacts(
     params = (name or "", phone or "", email or "")
     result = await conn.execute(sql, params)
     contacts = await result.fetchall()
-    return [Contact(id=contact[0], name=contact[1], phone=contact[2], email=contact[3]) for contact in contacts]
-
+    return [
+        Contact(id=contact[0], name=contact[1], phone=contact[2], email=contact[3])
+        for contact in contacts
+    ]
 
 
 async def get_contact_by_id(contact_id: str, conn: AsyncConnection) -> Contact:
@@ -75,8 +77,35 @@ async def get_contact_by_id(contact_id: str, conn: AsyncConnection) -> Contact:
     return Contact(id=contact[0], name=contact[1], phone=contact[2], email=contact[3])
 
 
-async def update_contact(contact_id: str, contact: UpdateContact) -> Contact:
-    pass
+async def update_contact(
+    contact_id: str, contact: UpdateContact, conn: AsyncConnection
+) -> Contact:
+    sql = """
+    UPDATE
+        contacts
+    SET
+        name = COALESCE($1, name),
+        phone = COALESCE($2, phone),
+        email = COALESCE($3, email)
+    WHERE
+        id = $4
+    RETURNING
+        id, name, phone, email
+"""
+    params = (
+        contact.get("name"),
+        contact.get("phone"),
+        contact.get("email"),
+        contact_id,
+    )
+    result = await conn.execute(sql, params)
+    updated_contact = await result.fetchone()
+    return Contact(
+        id=updated_contact[0],
+        name=updated_contact[1],
+        phone=updated_contact[2],
+        email=updated_contact[3],
+    )
 
 
 async def delete_contact(contact_id: str, conn: AsyncConnection) -> bool:
@@ -95,7 +124,3 @@ async def delete_contact(contact_id: str, conn: AsyncConnection) -> bool:
     if deleted_id:
         is_deleted = True
     return is_deleted
-    
-
-
-
