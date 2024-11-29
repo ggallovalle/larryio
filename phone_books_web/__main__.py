@@ -1,15 +1,29 @@
 import contextlib
-from typing import AsyncIterator, TypedDict
+from typing import Any, AsyncIterator, TypedDict
 
+from psycopg import AsyncRawCursor
 from psycopg_pool import AsyncConnectionPool
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
+from phone_books.db_schema import MIGRATION
 
 import phone_books.contacts as core
 from phone_books_web import settings
+import json
 
+def default_to_str(obj):
+    print(f"obj: {obj}")
+    print(f"type(obj): {type(obj)}")
+    return obj
+
+class OrjsonResponse(JSONResponse):
+    def render(self, content: Any) -> bytes:
+        str_content =  json.dumps(content, default=str)
+        return str_content.encode("utf-8")
+
+JSONResponse = OrjsonResponse
 
 async def homepage(request: Request) -> Response:
     return JSONResponse({"hello": "world 2"})
@@ -30,7 +44,6 @@ async def contacts_index(request: Request) -> Response:
 
 async def contacts_store(request: Request) -> Response:
     data = await request.json()
-    assert isinstance(data, dict)
     assert "name" in data
     assert "phone" in data
     assert "email" in data
@@ -85,14 +98,18 @@ class State(TypedDict):
 
     @staticmethod
     def get_pg_pool(request: Request) -> AsyncConnectionPool:
-        return request.app.state["pg_pool"]
+        return request.state.pg_pool
 
 
 def make_app_lifespan(config: settings.Config):
     @contextlib.asynccontextmanager
     async def app_lifespan(app: Starlette) -> AsyncIterator[State]:
-        async with AsyncConnectionPool(config.database_url) as pool:
+        async with AsyncConnectionPool(config.database_url, kwargs={"cursor_factory": AsyncRawCursor}) as pool:
+            async with pool.connection() as conn:
+                await MIGRATION.up(conn)
             yield State(pg_pool=pool)
+            async with pool.connection() as conn:
+                await MIGRATION.down(conn)
 
     return app_lifespan
 
