@@ -7,10 +7,13 @@ class Config:
     database_url: str
 
     @staticmethod
-    def from_dotenv(source: str = ".env", verbose: bool = False) -> "Config":
+    def from_dotenv(source: str|dict = ".env", verbose: bool = False) -> "Config":
         import dotenv
+        if isinstance(source, str):
+            env = dotenv.dotenv_values(source, verbose=verbose)
+        else:
+            env = source
 
-        env = dotenv.dotenv_values(source, verbose=verbose)
         database_url = env["DATABASE_URL"]
         debug = _dotenv_bool(env, "DEBUG")
         config = Config(debug=debug, database_url=database_url)

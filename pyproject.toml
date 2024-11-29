@@ -7,5 +7,6 @@ testpaths = [
     "integration",
 ]
 # https://pytest-asyncio.readthedocs.io/en/latest/reference/configuration.html
-asyncio_mode = "auto"
-asyncio_default_fixture_loop_scope = "fixture"
+asyncio_default_fixture_loop_scope = "session"
+app_dotenv = ".env.test"
+app_migration_file = "phone_books.db_schema:MIGRATION"
