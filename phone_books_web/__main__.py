@@ -20,7 +20,10 @@ async def contacts_index(request: Request) -> Response:
     phone = request.query_params.get("filter[phone]")
     email = request.query_params.get("filter[email]")
 
-    contacts = await core.get_all_contacts(name=name, phone=phone, email=email)
+    pg_pool = State.get_pg_pool(request)
+
+    async with pg_pool.connection() as pg_conn:
+        contacts = await core.get_all_contacts(name=name, phone=phone, email=email, conn=pg_conn)
 
     return JSONResponse(contacts)
 

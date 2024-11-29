@@ -46,9 +46,9 @@ async def test_given_a_new_contact_when_created_then_it_is_returned(pg_conn: Asy
 
 
 @pytest.mark.asyncio
-async def test_given_no_contacts_when_get_all_contacts_then_return_empty_list():
+async def test_given_no_contacts_when_get_all_contacts_then_return_empty_list(pg_conn: AsyncConnection):
     # when
-    result = await sut.get_all_contacts()
+    result = await sut.get_all_contacts(conn=pg_conn)
     # then
     assert result == []
 
@@ -63,7 +63,7 @@ async def test_given_contacts_when_get_all_contacts_then_return_all_contacts(pg_
     await sut.create_contact(contact2, pg_conn)
     await sut.create_contact(contact3, pg_conn)
     # when
-    result = await sut.get_all_contacts()
+    result = await sut.get_all_contacts(conn=pg_conn)
     # then
     assert len(result) == 3
 
@@ -87,7 +87,7 @@ async def test_given_contacts_when_get_all_contacts_with_name_then_return_contac
     await sut.create_contact(contact4, pg_conn)
     await sut.create_contact(contact5, pg_conn)
     # when
-    result = await sut.get_all_contacts(name=name)
+    result = await sut.get_all_contacts(name=name, conn=pg_conn)
     # then
     assert len(result) == expected_count
 
@@ -131,7 +131,7 @@ async def test_given_contacts_when_delete_contact_only_deletes_one(pg_conn: Asyn
     await sut.create_contact(contact5, pg_conn)
     # when
     deleted = await sut.delete_contact(ref1["id"])
-    all_contacts = await sut.get_all_contacts()
+    all_contacts = await sut.get_all_contacts(conn=pg_conn)
 
     # then
     assert deleted

@@ -41,8 +41,23 @@ async def get_all_contacts(
     name: str | None = None,
     phone: str | None = None,
     email: str | None = None,
+    conn: AsyncConnection,
 ) -> list[Contact]:
-    pass
+    sql = """
+    SELECT
+        id, name, phone, email
+    FROM
+        contacts
+    WHERE
+        ($1 = '' OR name ILIKE '%' || $1 || '%')
+        AND ($2 = '' OR phone = $2)
+        AND ($3 = '' OR email = $3)
+"""
+    params = (name or "", phone or "", email or "")
+    result = await conn.execute(sql, params)
+    contacts = await result.fetchall()
+    return [Contact(id=contact[0], name=contact[1], phone=contact[2], email=contact[3]) for contact in contacts]
+
 
 
 async def get_contact_by_id(contact_id: str, conn: AsyncConnection) -> Contact:
