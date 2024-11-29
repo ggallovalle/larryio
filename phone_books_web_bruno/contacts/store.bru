@@ -1,0 +1,19 @@
+meta {
+  name: contact_store
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url_base}}/{{url_contacts}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "john",
+    "phone": 123456,
+    "email": "john@gmail.com"
+  }
+}

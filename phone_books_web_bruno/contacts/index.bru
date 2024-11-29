@@ -1,0 +1,17 @@
+meta {
+  name: contact_index
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url_base}}/{{url_contacts}}
+  body: none
+  auth: none
+}
+
+params:query {
+  ~filter[name]: John Doe
+  ~filter[phone]: 1234567890
+  ~filter[email]: john-doe@example.com
+}
