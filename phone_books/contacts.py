@@ -79,5 +79,23 @@ async def update_contact(contact_id: str, contact: UpdateContact) -> Contact:
     pass
 
 
-async def delete_contact(contact_id: str) -> bool:
-    pass
+async def delete_contact(contact_id: str, conn: AsyncConnection) -> bool:
+    sql = """
+    DELETE FROM
+        contacts
+    WHERE
+        id = $1
+    RETURNING
+        id
+    """
+    params = (contact_id,)
+    is_deleted = False
+    result = await conn.execute(sql, params)
+    deleted_id = await result.fetchone()
+    if deleted_id:
+        is_deleted = True
+    return is_deleted
+    
+
+
+

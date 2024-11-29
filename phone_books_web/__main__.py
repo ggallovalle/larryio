@@ -66,7 +66,10 @@ async def contacts_update(request: Request) -> Response:
 async def contacts_delete(request: Request) -> Response:
     ref = request.path_params["id"]
 
-    deleted = await core.delete_contact(ref)
+    pg_pool = State.get_pg_pool(request)
+
+    async with pg_pool.connection() as pg_conn:
+        deleted = await core.delete_contact(ref, conn=pg_conn)
 
     if not deleted:
         return JSONResponse({"message": "Contact not found"}, status_code=404)

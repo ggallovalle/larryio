@@ -130,7 +130,7 @@ async def test_given_contacts_when_delete_contact_only_deletes_one(pg_conn: Asyn
     await sut.create_contact(contact4, pg_conn)
     await sut.create_contact(contact5, pg_conn)
     # when
-    deleted = await sut.delete_contact(ref1["id"])
+    deleted = await sut.delete_contact(ref1["id"], pg_conn)
     all_contacts = await sut.get_all_contacts(conn=pg_conn)
 
     # then
