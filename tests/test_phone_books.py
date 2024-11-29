@@ -1,5 +1,8 @@
-import pytest
 import asyncio
+
+import pytest
+from psycopg import AsyncConnection
+
 import phone_books.contacts as sut
 
 
@@ -14,6 +17,19 @@ class TestAsyncWorks:
     async def test_it_works(self):
         await asyncio.sleep(0.1)
         assert True
+
+
+@pytest.mark.asyncio
+async def test_db_connection_works(pg_conn: AsyncConnection):
+    assert pg_conn is not None
+    name = "John Doe"
+    result = await pg_conn.execute(
+        "INSERT INTO contacts (name, phone) VALUES ($1, $2) RETURNING id, name",
+        (name, "1234567890"),
+    )
+    contact = await result.fetchone()
+    assert contact[0]
+    assert contact[1] == name
 
 
 @pytest.mark.asyncio
