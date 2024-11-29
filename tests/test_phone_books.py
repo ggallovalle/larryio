@@ -98,7 +98,7 @@ async def test_given_contacts_when_get_contact_by_id_then_return_contact(pg_conn
     contact = {"name": "John Doe", "phone": "1234567890", "email": "john@email.com"}
     created = await sut.create_contact(contact, pg_conn)
     # when
-    result = await sut.get_contact_by_id(created["id"])
+    result = await sut.get_contact_by_id(created["id"], pg_conn)
     # then
     result == created
 

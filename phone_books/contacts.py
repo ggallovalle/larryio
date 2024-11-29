@@ -36,17 +36,33 @@ async def create_contact(contact: CreateContact, conn: AsyncConnection) -> Conta
     return Contact(id=contact_id[0], **contact)
 
 
-
 async def get_all_contacts(
-    *, name: str | None = None, phone: str | None = None, email: str | None = None
+    *,
+    name: str | None = None,
+    phone: str | None = None,
+    email: str | None = None,
 ) -> list[Contact]:
     pass
 
-async def get_contact_by_id(contact_id: str) -> Contact:
-    pass
+
+async def get_contact_by_id(contact_id: str, conn: AsyncConnection) -> Contact:
+    sql = """
+    SELECT
+        id, name, phone, email
+    FROM
+        contacts
+    WHERE
+        id = $1
+"""
+    params = (contact_id,)
+    result = await conn.execute(sql, params)
+    contact = await result.fetchone()
+    return Contact(id=contact[0], name=contact[1], phone=contact[2], email=contact[3])
+
 
 async def update_contact(contact_id: str, contact: UpdateContact) -> Contact:
     pass
+
 
 async def delete_contact(contact_id: str) -> bool:
     pass

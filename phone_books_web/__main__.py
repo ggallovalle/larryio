@@ -42,7 +42,10 @@ async def contacts_store(request: Request) -> Response:
 async def contacts_show(request: Request) -> Response:
     ref = request.path_params["id"]
 
-    contact = await core.get_contact_by_id(ref)
+    pg_pool = State.get_pg_pool(request)
+
+    async with pg_pool.connection() as pg_conn:
+        contact = await core.get_contact_by_id(ref, pg_conn)
 
     return JSONResponse(contact)
 
