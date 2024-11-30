@@ -1,0 +1,51 @@
+# For basic usage info, see:
+# https://slumber.lucaspickering.me/book/getting_started.html
+# For all collection options, see:
+# https://slumber.lucaspickering.me/book/api/request_collection/index.html
+
+# Profiles are groups of data you can easily switch between. A common usage is
+# to define profiles for various environments of a REST service
+profiles:
+  dev:
+    name: Development
+    default: true
+    data:
+      url_base: http://localhost:5000
+      url_contact: contacts
+
+# Chains allow you to use dynamic data in your request templates
+chains:
+  example:
+    source: !request
+      recipe: example1
+    selector: $.data
+  id_contact:
+    source: !prompt
+      message: Enter a contact ID
+
+requests:
+
+  contact: !folder
+    name: Contact
+    requests:
+      contact_index: !request
+        method: GET
+        url: "{{url_base}}/{{url_contact}}"
+        query:
+          - filter[name]=John
+          - filter[phone]=555-5555
+          - filter[email]=john@example.com
+
+      contact_show: !request
+        method: GET
+        url: "{{url_base}}/{{url_contact}}/{{chains.id_contact}}"
+
+      contact_store: !request
+        method: POST
+        url: "{{url_base}}/{{url_contact}}"
+        body: !json
+          {
+            "name": "mary",
+            "phone": "505-81293728",
+            "email": "mary@gmail.com"
+          }
