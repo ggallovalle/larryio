@@ -4,7 +4,7 @@ import dataclasses
 @dataclasses.dataclass
 class Config:
     debug: bool
-    database_url: str
+    postgres_url: str
 
     @staticmethod
     def from_dotenv(source: str|dict = ".env", verbose: bool = False) -> "Config":
@@ -14,9 +14,9 @@ class Config:
         else:
             env = source
 
-        database_url = env["DATABASE_URL"]
+        database_url = env["POSTGRES_URL"]
         debug = _dotenv_bool(env, "DEBUG")
-        config = Config(debug=debug, database_url=database_url)
+        config = Config(debug=debug, postgres_url=database_url)
         return config
 
 

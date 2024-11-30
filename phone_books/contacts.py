@@ -62,7 +62,7 @@ async def get_all_contacts(
     ]
 
 
-async def get_contact_by_id(contact_id: str, conn: AsyncConnection) -> Contact:
+async def get_contact_by_id(contact_id: str, conn: AsyncConnection) -> Contact | None:
     sql = """
     SELECT
         id, name, phone, email
@@ -74,6 +74,8 @@ async def get_contact_by_id(contact_id: str, conn: AsyncConnection) -> Contact:
     params = (contact_id,)
     result = await conn.execute(sql, params)
     contact = await result.fetchone()
+    if not contact:
+        return None
     return Contact(id=contact[0], name=contact[1], phone=contact[2], email=contact[3])
 
 

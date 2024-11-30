@@ -104,7 +104,7 @@ class State(TypedDict):
 def make_app_lifespan(config: settings.Config):
     @contextlib.asynccontextmanager
     async def app_lifespan(app: Starlette) -> AsyncIterator[State]:
-        async with AsyncConnectionPool(config.database_url, kwargs={"cursor_factory": AsyncRawCursor}) as pool:
+        async with AsyncConnectionPool(config.postgres_url, kwargs={"cursor_factory": AsyncRawCursor}) as pool:
             async with pool.connection() as conn:
                 await MIGRATION.up(conn)
             yield State(pg_pool=pool)

@@ -45,7 +45,7 @@ async def pg_pool(
     app_dotenv: dict,
 ) -> AsyncIterator[AsyncConnectionPool]:
     async with AsyncConnectionPool(
-        app_dotenv["DATABASE_URL"], kwargs={"cursor_factory": AsyncRawCursor}, timeout=3
+        app_dotenv["POSTGRES_URL"], kwargs={"cursor_factory": AsyncRawCursor}, timeout=3
     ) as pool:
         yield pool
 
